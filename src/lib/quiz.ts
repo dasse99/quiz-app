@@ -5,11 +5,16 @@ export type Question = {
   explanation: string;
 };
 
+export type Paper = {
+  title: string;
+  questions: Question[];
+};
+
 // 사용자가 고른 보기 번호(1~4). 아직 고르지 않았으면 null
 export type Answer = number | null;
 
 export type ParseResult =
-  | { ok: true; questions: Question[] }
+  | ({ ok: true } & Paper)
   | { ok: false; errors: string[] };
 
 export type QuestionResult = {
@@ -72,7 +77,7 @@ function findQuestionErrors(item: unknown, label: string): string[] {
   return errors;
 }
 
-export function parseQuizFile(text: string): ParseResult {
+export function parsePaperFile(text: string): ParseResult {
   // 메모장으로 저장한 파일은 맨 앞에 보이지 않는 문자가 붙을 수 있습니다.
   const content = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 
@@ -82,24 +87,30 @@ export function parseQuizFile(text: string): ParseResult {
   } catch {
     return {
       ok: false,
-      errors: ["파일을 읽을 수 없습니다. 문제 파일(.json)이 맞는지, 쉼표나 따옴표가 빠지지 않았는지 확인해 주세요."],
+      errors: ["파일을 읽을 수 없습니다. 쉼표나 따옴표가 빠지지 않았는지 확인해 주세요."],
     };
   }
 
-  const questions = (data as { questions?: unknown } | null)?.questions;
-  if (!Array.isArray(questions)) {
-    return { ok: false, errors: ["파일에서 문제 목록(questions)을 찾을 수 없습니다."] };
-  }
-  if (questions.length === 0) {
-    return { ok: false, errors: ["파일에 문제가 하나도 없습니다."] };
+  const { title, questions } = (data ?? {}) as { title?: unknown; questions?: unknown };
+  const errors: string[] = [];
+
+  if (!isFilledText(title)) {
+    errors.push("문제지 제목(title)이 없습니다.");
   }
 
-  const errors = questions.flatMap((item, index) => findQuestionErrors(item, `${index + 1}번 문항`));
+  if (!Array.isArray(questions)) {
+    errors.push("파일에서 문제 목록(questions)을 찾을 수 없습니다.");
+  } else if (questions.length === 0) {
+    errors.push("파일에 문제가 하나도 없습니다.");
+  } else {
+    errors.push(...questions.flatMap((item, index) => findQuestionErrors(item, `${index + 1}번 문항`)));
+  }
+
   if (errors.length > 0) {
     return { ok: false, errors };
   }
 
-  return { ok: true, questions: questions as Question[] };
+  return { ok: true, title: title as string, questions: questions as Question[] };
 }
 
 export function gradeQuiz(questions: Question[], answers: number[]): QuizResult {

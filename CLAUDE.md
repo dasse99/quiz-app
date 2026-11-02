@@ -4,14 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 프로젝트 개요
 
-선생님이 제공한 JSON 문제 파일을 업로드해 4지선다 문제를 풀고, 모두 끝낸 뒤 점수·정오·해설을 확인하는 교육용 웹앱입니다. Next.js와 TypeScript로 만들고 Vercel에 배포하며, PC와 휴대폰에서 사용할 수 있어야 합니다.
+`question-papers` 폴더에 준비한 문제지를 목록에서 골라 4지선다 문제를 풀고, 모두 끝낸 뒤 점수·정오·해설을 확인하는 교육용 웹앱입니다. Next.js와 TypeScript로 만들고 Vercel에 배포하며, PC와 휴대폰에서 사용할 수 있어야 합니다.
 
 요구사항의 기준은 `PRD.md`입니다. 세부 조건은 이 파일에 옮겨 적지 않았으니 작업 전에 `PRD.md`를 읽습니다.
 
 ## 현재 상태
 
 - 1일차 앱을 만들었고 이 컴퓨터에서 동작을 확인했습니다. 아직 배포하지 않았습니다.
-- `sample-questions.json`은 파일 형식 참고용입니다. 앱에 고정하거나 자동으로 불러오지 않고, `public/`에도 넣지 않습니다.
+- 문제지는 `question-papers` 폴더의 JSON 파일입니다. 현재 `sample-questions.json` 1개가 있습니다. 문제지를 임의로 추가하거나 문항 내용을 바꾸지 않습니다.
+- 버전 구분: 초기 버전은 학생이 JSON 파일을 직접 업로드했고(커밋 `baf4f0f`), 현재 버전은 `question-papers` 목록에서 선택합니다. 학생 업로드 기능은 없습니다.
 - `AGENTS.md`는 앱을 켤 때 Next.js가 자동으로 만드는 파일입니다. 지워도 다시 생깁니다.
 - 이 폴더에서 Git을 사용합니다. GitHub에는 올리지 않았습니다.
 - 작업 환경은 Windows 11이고, 작업 폴더 경로에 한글과 공백이 있습니다. (`C:\Users\dasse\Desktop\클로드\claude vibe coding`)
@@ -29,13 +30,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 코드 구조
 
-- `src/lib/quiz.ts`: 파일 검사(`parseQuizFile`)와 채점(`gradeQuiz`). 화면과 분리되어 있습니다.
-- `src/app/page.tsx`: 업로드 → 문항 확인 → 풀이 → 결과 단계를 전환합니다. 단계별 화면은 `src/components/`에 있습니다.
-- 서버 없이 브라우저에서 파일 읽기와 채점을 처리합니다. 풀이 내용은 화면 메모리에만 있어서 새로고침하면 사라집니다.
+- `src/lib/papers.ts`: `question-papers` 폴더의 JSON 파일을 읽습니다(`loadPapers`). 서버에서만 실행됩니다.
+- `src/lib/quiz.ts`: 문제지 검사(`parsePaperFile`)와 채점(`gradeQuiz`). 화면과 분리되어 있습니다.
+- `src/app/page.tsx`: 문제지를 읽어 `src/components/QuizApp.tsx`에 넘깁니다. `QuizApp`이 목록 → 풀이 → 결과 단계를 전환하고, 단계별 화면은 `src/components/`에 있습니다.
+- 채점은 브라우저에서 처리합니다. 풀이 내용은 화면 메모리에만 있어서 새로고침하면 사라집니다.
+- 완성본에서는 문제지를 빌드할 때 읽습니다. 문제지를 추가하거나 고치면 다시 빌드해야 반영됩니다. `npm.cmd run dev`로 켠 앱은 새로고침만 하면 반영됩니다.
+- 완성본을 만들기(`npm.cmd run build`) 전에는 켜져 있는 앱을 끕니다.
 
 ## 범위 구분
 
-- **1일차(지금 만들 기능):** JSON 파일 업로드, 문항 표시, 4지선다 풀이, 모든 문항 완료 후 채점·점수·정오·해설 표시, 로컬 실행과 Vercel 배포
+- **1일차(지금 만들 기능):** 문제지 목록 표시와 선택, 문항 표시, 4지선다 풀이, 모든 문항 완료 후 채점·점수·정오·해설 표시, 로컬 실행과 Vercel 배포
 - **2일차(나중에 추가할 기능):** 교사 Google 로그인과 학생 이름 기반 게스트 입장, 학습자료 업로드와 Azure AI 문제 생성, 생성 문제 저장·공개와 학생 문제 목록, 풀이 결과의 Firestore 저장, 교사의 학생별 점수·오답·평균 조회
 - 1일차에는 앱을 확장할 수 있도록 구성하되 2일차 기능을 미리 구현하지 않습니다.
 - 배포는 사용자가 따로 요청할 때만 합니다. 임시 확인용 주소도 만들지 않습니다.
@@ -43,7 +47,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## PRD 외에 사용자가 정한 사항
 
 - 결과 화면에 문항별로 내가 고른 답과 정답도 보여줍니다.
-- 결과 화면에 첫 화면으로 돌아가는 **다른 파일 풀기** 버튼을 둡니다.
+- 결과 화면에 문제지 목록으로 돌아가는 **다른 문제지 풀기** 버튼을 둡니다.
+- 형식이 잘못된 문제지는 목록 아래에 파일 이름과 잘못된 곳을 표시합니다. 정상 문제지는 그대로 풀 수 있습니다.
+- 원본 JSON 접근을 막거나 정답을 숨기는 보호 기능은 지금 넣지 않습니다.
 - `PRD.md`의 "아직 앱 코드를 작성하지 말고" 문구는 그대로 두되, 요구사항 확인 단계의 지시였으므로 앱 작업을 막는 문구로 보지 않습니다.
 
 ## 앱을 만드는 기준

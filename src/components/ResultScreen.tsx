@@ -47,7 +47,7 @@ export function ResultScreen({ result, onRestart }: Props) {
       </ol>
 
       <button className="button primary" type="button" onClick={onRestart}>
-        다른 파일 풀기
+        다른 문제지 풀기
       </button>
     </section>
   );

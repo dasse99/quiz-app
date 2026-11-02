@@ -106,21 +106,39 @@ h1 {
 }
 
 .button:focus-visible,
-.file-button:focus-within,
+.paper-button:focus-visible,
 .option:focus-within {
   outline: 3px solid #8db4ee;
   outline-offset: 2px;
 }
 
-.file-button {
-  position: relative;
+.paper-list {
+  list-style: none;
 }
 
-.file-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
+.paper-list li + li {
+  margin-top: 10px;
+}
+
+.paper-button {
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: left;
+  word-break: inherit;
+  cursor: pointer;
+}
+
+.paper-button:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
 }
 
 .error-box {
@@ -136,29 +154,14 @@ h1 {
   font-size: 1.05rem;
 }
 
+.error-box h3 {
+  margin: 12px 0 0;
+  font-size: 1rem;
+}
+
 .error-box ul {
-  margin: 8px 0;
+  margin: 4px 0 8px;
   padding-left: 20px;
-}
-
-.file-info {
-  margin: 20px 0 24px;
-}
-
-.file-info div {
-  display: flex;
-  gap: 16px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.file-info dt {
-  flex: 0 0 76px;
-  color: var(--muted);
-}
-
-.file-info dd {
-  font-weight: 600;
 }
 
 .progress {
@@ -323,9 +326,5 @@ h1 {
 
   .card {
     padding: 20px;
-  }
-
-  .file-button {
-    width: 100%;
   }
 }
