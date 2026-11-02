@@ -1,0 +1,13 @@
+# 설치된 패키지
+node_modules/
+
+# 자동 생성 파일
+.next/
+next-env.d.ts
+*.tsbuildinfo
+AGENTS.md
+
+# 비밀키·로그인 정보
+.env*
+*.pem
+*.key
