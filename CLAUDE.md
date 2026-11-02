@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 현재 상태
 
 - 1일차 앱을 만들었고 이 컴퓨터에서 동작을 확인했습니다. 아직 배포하지 않았습니다.
-- 문제지는 `question-papers` 폴더의 JSON 파일입니다. 현재 `sample-questions.json` 1개가 있습니다. 문제지를 임의로 추가하거나 문항 내용을 바꾸지 않습니다.
+- 문제지는 `question-papers` 폴더의 JSON 파일입니다. 현재 `sample-questions.json`, `high-school-questions.json` 2개가 있습니다. 문제지를 임의로 추가하거나 문항 내용을 바꾸지 않습니다.
 - 버전 구분: 초기 버전은 학생이 JSON 파일을 직접 업로드했고(커밋 `baf4f0f`), 현재 버전은 `question-papers` 목록에서 선택합니다. 학생 업로드 기능은 없습니다.
 - `AGENTS.md`는 앱을 켤 때 Next.js가 자동으로 만드는 파일입니다. 지워도 다시 생깁니다.
 - 이 폴더에서 Git을 사용합니다. GitHub에는 올리지 않았습니다.
