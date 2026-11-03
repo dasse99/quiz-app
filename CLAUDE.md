@@ -14,10 +14,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 문제지는 `question-papers` 폴더의 JSON 파일입니다. 현재 `sample-questions.json`, `high-school-questions.json` 2개가 있습니다. 문제지를 임의로 추가하거나 문항 내용을 바꾸지 않습니다.
 - 버전 구분: 초기 버전은 학생이 JSON 파일을 직접 업로드했고(커밋 `baf4f0f`), 현재 버전은 `question-papers` 목록에서 선택합니다. 학생 업로드 기능은 없습니다.
 - `AGENTS.md`는 앱을 켤 때 Next.js가 자동으로 만드는 파일입니다. 지워도 다시 생깁니다.
-- 이 폴더에서 Git을 사용합니다. GitHub에는 올리지 않았습니다.
+- 이 폴더에서 Git을 사용하고, 공개 저장소 https://github.com/dasse99/quiz-app 의 `main`에 올립니다. 처음 올렸을 때 자동 배포 흔적은 없었습니다. 계정 전체의 Vercel 연결은 확인하지 못했습니다.
 - 작업 환경은 Windows 11이고, 작업 폴더 경로에 한글과 공백이 있습니다. (`C:\Users\dasse\Desktop\클로드\claude vibe coding`)
 - 컴퓨터 전체에서 쓸 수 있게 설치한 도구: Node.js 26.13.0, npm 11.20.0, Git 2.55.0, GitHub CLI 2.103.3
-- GitHub CLI는 로그인하지 않은 상태입니다. 사용자의 허락 없이 로그인하지 않습니다.
+- GitHub CLI는 사용자가 `dasse99` 계정으로 로그인했습니다. 다시 로그인하거나 다른 계정으로 바꾸지 않습니다.
 - 사용자가 직접 연 PowerShell에서는 `npm`이 차단될 수 있습니다. 사용자에게 안내할 때는 `npm.cmd`, `npx.cmd`로 적어 줍니다.
 
 ## 명령
