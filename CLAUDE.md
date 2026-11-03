@@ -10,9 +10,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 현재 상태
 
-- 1일차 앱을 만들었고 이 컴퓨터에서 동작을 확인했습니다. 아직 배포하지 않았습니다.
-- 문제지는 `question-papers` 폴더의 JSON 파일입니다. 현재 `sample-questions.json`, `high-school-questions.json` 2개가 있습니다. 문제지를 임의로 추가하거나 문항 내용을 바꾸지 않습니다.
-- 버전 구분: 초기 버전은 학생이 JSON 파일을 직접 업로드했고(커밋 `baf4f0f`), 현재 버전은 `question-papers` 목록에서 선택합니다. 학생 업로드 기능은 없습니다.
+- 1일차 앱을 Vercel에 배포했습니다. 정식 주소는 https://quiz-app-pink-two-45.vercel.app 이고 로그인 없이 열립니다. Vercel 프로젝트 이름은 `quiz-app`(`dasse99` 팀)입니다.
+- Vercel 프로젝트가 GitHub 저장소와 연결되어 있어 `main`에 올리면 자동으로 새로 배포됩니다. 배포를 요청받지 않았으면 GitHub에 올리지 않습니다.
+- 2일차 작업 중입니다. 첫 화면(`/`)에서 교사·학생을 고릅니다. 위의 배포 주소에는 아직 1일차 앱만 있고, 2일차 기능은 배포하지 않았습니다.
+- 교사 화면(`/teacher`): Firebase Google 로그인 후 서버가 로그인 확인증과 허용 이메일을 확인합니다. 로그인한 교사는 JSON 문제지를 올려 미리보기 → 등록(처음엔 비공개) → 공개·비공개 전환을 하고, 문제지별 결과표(이름·점수·틀린 문제)와 평균을 봅니다.
+- 학생 화면(`/student`): 이름만 입력하고, 교사가 공개한 문제지만 봅니다. 문제를 받을 때 정답·해설은 빠져 있고, 최종 제출 때 서버가 채점·저장한 뒤 본인 결과만 돌려줍니다. 저장에 실패하면 고른 답을 유지한 채 다시 시도할 수 있습니다.
+- 사용자가 정한 규칙: 같은 제목(빈칸·영문 대소문자 무시)이거나 내용이 똑같은 문제지는 중복으로 막습니다. 같은 문제지를 같은 이름(앞뒤·겹친 빈칸, 영문 대소문자 무시)으로 다시 풀면 최신 결과로 덮어쓰고, 평균은 이름별 최신 결과로 계산합니다.
+- Firestore(`(default)`, 서울 `asia-northeast3`, 프로덕션 모드)의 보안 규칙은 모든 직접 읽기·쓰기를 막습니다(`allow read, write: if false`). 앱은 서버(`firebase-admin`)를 통해서만 접근하니 규칙을 열지 않습니다. 모음은 `papers`(문서 번호 = 내용 해시)와 `results`(문서 번호 = 문제지 번호 + 이름 해시)입니다.
+- Firebase 프로젝트는 `quiz-app-76f77`(무료 Spark 요금제), 웹 앱 이름은 `quiz-app-web`입니다. Google 로그인 사용 중이며 승인된 도메인에는 기본값(`localhost` 등)만 있습니다.
+- 설정값은 `.env.local`에 있습니다(GitHub에 올라가지 않음): `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID`, `TEACHER_EMAIL`(교사로 허용한 계정 1개), `GOOGLE_APPLICATION_CREDENTIALS`(서버 열쇠 파일의 위치). 이 값을 바꾸면 앱을 다시 켭니다.
+- 서버 열쇠 파일은 작업 폴더 밖 `C:\Users\dasse\firebase-keys\quiz-app-76f77-admin.json`에 있습니다. 내용을 읽거나 출력하거나 저장소·채팅에 넣지 않습니다.
+- Vercel에 배포할 때 필요한 일: Vercel 주소를 Firebase 승인된 도메인에 추가, `.env.local`의 값을 Vercel 환경변수에 넣기, 서버 열쇠는 파일 위치 대신 다른 방법으로 전달해야 하므로 코드(`src/lib/firebaseAdmin.ts`) 보완이 필요합니다. 비밀값은 사용자가 Vercel 화면에 직접 입력하게 안내합니다.
+- 브라우저 화면(Claude 브라우저)에서는 Google 로그인 창이 사용자가 직접 눌러야만 열립니다. 파일 고르기 창도 열 수 없습니다.
+- `question-papers` 폴더의 `sample-questions.json`(중학교 정보과목), `high-school-questions.json`(고등학교 정보과목)은 교사가 올려 볼 예시 파일입니다. 앱이 이 폴더를 직접 읽지는 않습니다. 문제지를 임의로 추가하거나 문항 내용을 바꾸지 않습니다.
+- 버전 구분: 초기 버전은 학생이 JSON 파일을 직접 업로드했고(커밋 `baf4f0f`), 1일차 완성본은 `question-papers` 목록에서 선택했습니다. 지금은 교사가 올리고 공개한 문제지를 Firestore에서 읽습니다.
 - `AGENTS.md`는 앱을 켤 때 Next.js가 자동으로 만드는 파일입니다. 지워도 다시 생깁니다.
 - 이 폴더에서 Git을 사용하고, 공개 저장소 https://github.com/dasse99/quiz-app 의 `main`에 올립니다. 처음 올렸을 때 자동 배포 흔적은 없었습니다. 계정 전체의 Vercel 연결은 확인하지 못했습니다.
 - 작업 환경은 Windows 11이고, 작업 폴더 경로에 한글과 공백이 있습니다. (`C:\Users\dasse\Desktop\클로드\claude vibe coding`)
@@ -30,12 +41,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 코드 구조
 
-- `src/lib/papers.ts`: `question-papers` 폴더의 JSON 파일을 읽습니다(`loadPapers`). 서버에서만 실행됩니다.
-- `src/lib/quiz.ts`: 문제지 검사(`parsePaperFile`)와 채점(`gradeQuiz`). 화면과 분리되어 있습니다.
-- `src/app/page.tsx`: 문제지를 읽어 `src/components/QuizApp.tsx`에 넘깁니다. `QuizApp`이 목록 → 풀이 → 결과 단계를 전환하고, 단계별 화면은 `src/components/`에 있습니다.
-- 채점은 브라우저에서 처리합니다. 풀이 내용은 화면 메모리에만 있어서 새로고침하면 사라집니다.
-- 완성본에서는 문제지를 빌드할 때 읽습니다. 문제지를 추가하거나 고치면 다시 빌드해야 반영됩니다. `npm.cmd run dev`로 켠 앱은 새로고침만 하면 반영됩니다.
-- 완성본을 만들기(`npm.cmd run build`) 전에는 켜져 있는 앱을 끕니다.
+- `src/lib/quiz.ts`: 문제지 검사(`parsePaperFile`)와 채점(`gradeQuiz`). 화면과 분리되어 있고 교사 화면·서버가 같이 씁니다.
+- `src/lib/records.ts`: 학생용 문항(정답 제외), 이름·제목 비교 기준, 평균 등 저장과 관련된 규칙. `src/lib/paperStore.ts`가 Firestore 읽기·쓰기, `src/lib/firebaseAdmin.ts`가 서버용 연결, `src/lib/teacherAuth.ts`가 교사 확인(`checkTeacher`)입니다.
+- 서버 기능(`src/app/api/`): 학생용 `papers`(공개 목록), `papers/[id]`(정답 없는 문항), `papers/[id]/submit`(채점·저장). 교사용 `teacher/me`, `teacher/papers`(목록·등록), `teacher/papers/[id]`(공개 전환), `teacher/papers/[id]/results`(결과표·평균). 교사용은 모두 `checkTeacher`를 먼저 거칩니다.
+- 화면: `src/app/page.tsx`(역할 고르기), `src/app/teacher/page.tsx` → `TeacherScreen`(로그인) → `TeacherDashboard`(등록·공개·결과표), `src/app/student/page.tsx` → `StudentApp`(이름) → `QuizApp`(목록 → 풀이 → 제출 → 결과).
+- 풀이 중인 답은 화면 메모리에만 있어서 새로고침하면 사라집니다. 저장은 최종 제출 때 한 번만 합니다.
+- 완성본을 만들기(`npm.cmd run build`) 전에는 켜져 있는 앱을 끕니다. `.claude/launch.json`에 개발용(`quiz-app`)과 완성본 실행용(`quiz-app-production`, 먼저 빌드 필요)이 있습니다. 개발용은 다시 켜질 때 화면을 자동으로 새로고침합니다.
 
 ## 범위 구분
 
@@ -48,8 +59,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - 결과 화면에 문항별로 내가 고른 답과 정답도 보여줍니다.
 - 결과 화면에 문제지 목록으로 돌아가는 **다른 문제지 풀기** 버튼을 둡니다.
-- 형식이 잘못된 문제지는 목록 아래에 파일 이름과 잘못된 곳을 표시합니다. 정상 문제지는 그대로 풀 수 있습니다.
-- 원본 JSON 접근을 막거나 정답을 숨기는 보호 기능은 지금 넣지 않습니다.
+- 형식이 잘못된 문제지는 교사가 올릴 때 파일 이름과 잘못된 곳을 보여주고 등록하지 않습니다.
+- 풀이 중에는 학생에게 정답·해설을 보내지 않습니다(2일차부터 서버 채점).
 - `PRD.md`의 "아직 앱 코드를 작성하지 말고" 문구는 그대로 두되, 요구사항 확인 단계의 지시였으므로 앱 작업을 막는 문구로 보지 않습니다.
 
 ## 앱을 만드는 기준
