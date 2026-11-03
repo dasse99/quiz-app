@@ -403,6 +403,35 @@ p.paper-meta {
   font-size: 0.95rem;
 }
 
+.generated-list {
+  margin: 12px 0 0;
+  padding-left: 22px;
+}
+
+.generated-list > li + li {
+  margin-top: 14px;
+}
+
+.generated-question {
+  color: var(--text) !important;
+  font-weight: 600;
+}
+
+.generated-options {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  list-style: decimal;
+  font-size: 0.95rem;
+}
+
+.generated-options .is-answer {
+  color: var(--correct);
+}
+
+.generated-explanation {
+  font-size: 0.92rem;
+}
+
 .teacher-papers {
   list-style: none;
   margin-top: 8px;

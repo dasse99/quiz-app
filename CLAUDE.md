@@ -19,8 +19,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Firestore(`(default)`, 서울 `asia-northeast3`, 프로덕션 모드)의 보안 규칙은 모든 직접 읽기·쓰기를 막습니다(`allow read, write: if false`). 앱은 서버(`firebase-admin`)를 통해서만 접근하니 규칙을 열지 않습니다. 모음은 `papers`(문서 번호 = 내용 해시)와 `results`(문서 번호 = 문제지 번호 + 이름 해시)입니다.
 - Firebase 프로젝트는 `quiz-app-76f77`(무료 Spark 요금제), 웹 앱 이름은 `quiz-app-web`입니다. Google 로그인 사용 중이며 승인된 도메인에는 기본값(`localhost` 등)만 있습니다.
 - 설정값은 `.env.local`에 있습니다(GitHub에 올라가지 않음): `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID`, `TEACHER_EMAIL`(교사로 허용한 계정 1개), `GOOGLE_APPLICATION_CREDENTIALS`(서버 열쇠 파일의 위치). 이 값을 바꾸면 앱을 다시 켭니다.
+- PDF 출제: 교사 화면의 **PDF로 문제 만들기**에서 글자 PDF(512KiB·본문 12,000자 이하, 교안의 교육용 기준)를 올리면 서버(`/api/teacher/generate`)가 `unpdf`로 본문을 읽고 Azure AI로 제목+10문항을 만들어 돌려줍니다(저장하지 않음). 교사는 **취소** 또는 **저장하고 공개하기**만 고르고, 저장은 `/api/teacher/papers?source=ai`(10문항 재검사, 바로 공개)로 합니다. 상한 초과·빈 파일·스캔·암호·손상 PDF는 Azure를 부르기 전에 거부하고, 본문을 자르지 않습니다. 채점에는 AI를 쓰지 않습니다.
+- Azure 연결: `.env.local`의 `AZURE_API_STYLE=openai-v1`, `AZURE_ENDPOINT`, `AZURE_DEPLOYMENT`, `AZURE_API_KEY`(사용자가 직접 입력). `{AZURE_ENDPOINT}/openai/v1/chat/completions`에 `model`=배포명, `api-key` 머리글, JSON 스키마 응답 형식으로 호출하며 이 방식으로 실제 호출이 성공했습니다. 다른 방식이나 모델로 바꾸지 않습니다. 키 값은 읽거나 출력하지 않습니다. 실제 호출은 강사가 허용한 범위에서만 합니다.
 - 서버 열쇠 파일은 작업 폴더 밖 `C:\Users\dasse\firebase-keys\quiz-app-76f77-admin.json`에 있습니다. 내용을 읽거나 출력하거나 저장소·채팅에 넣지 않습니다.
-- Vercel에 배포할 때 필요한 일: Vercel 주소를 Firebase 승인된 도메인에 추가, `.env.local`의 값을 Vercel 환경변수에 넣기, 서버 열쇠는 파일 위치 대신 다른 방법으로 전달해야 하므로 코드(`src/lib/firebaseAdmin.ts`) 보완이 필요합니다. 비밀값은 사용자가 Vercel 화면에 직접 입력하게 안내합니다.
+- Vercel에 배포할 때 필요한 일: Vercel 주소를 Firebase 승인된 도메인에 추가, `.env.local`의 값(Azure 포함)을 Vercel 환경변수에 넣기, 배포 주소에서 같은 표준 PDF로 PDF 읽기·요청 크기·AI 응답 시간(생성 경로 `maxDuration` 120초)을 따로 시험하기(아직 미확인), 서버 열쇠는 파일 위치 대신 다른 방법으로 전달해야 하므로 코드(`src/lib/firebaseAdmin.ts`) 보완이 필요합니다. 비밀값은 사용자가 Vercel 화면에 직접 입력하게 안내합니다.
 - 브라우저 화면(Claude 브라우저)에서는 Google 로그인 창이 사용자가 직접 눌러야만 열립니다. 파일 고르기 창도 열 수 없습니다.
 - `question-papers` 폴더의 `sample-questions.json`(중학교 정보과목), `high-school-questions.json`(고등학교 정보과목)은 교사가 올려 볼 예시 파일입니다. 앱이 이 폴더를 직접 읽지는 않습니다. 문제지를 임의로 추가하거나 문항 내용을 바꾸지 않습니다.
 - 버전 구분: 초기 버전은 학생이 JSON 파일을 직접 업로드했고(커밋 `baf4f0f`), 1일차 완성본은 `question-papers` 목록에서 선택했습니다. 지금은 교사가 올리고 공개한 문제지를 Firestore에서 읽습니다.

@@ -43,7 +43,12 @@ function toIso(value: unknown): string | null {
   return value instanceof Timestamp ? value.toDate().toISOString() : null;
 }
 
-export async function createPaper(paper: Paper, teacherEmail: string): Promise<CreatePaperResult> {
+export async function createPaper(
+  paper: Paper,
+  teacherEmail: string,
+  options: { published?: boolean } = {},
+): Promise<CreatePaperResult> {
+  const published = options.published ?? false;
   const db = getDb();
   // 내용이 같으면 문서 번호도 같아서 중복을 바로 찾을 수 있습니다.
   const ref = db.collection(PAPERS).doc(hash(paperContent(paper)).slice(0, 24));
@@ -60,7 +65,7 @@ export async function createPaper(paper: Paper, teacherEmail: string): Promise<C
       title: paper.title.trim(),
       questions: paper.questions,
       titleKey: key,
-      published: false,
+      published,
       createdBy: teacherEmail,
     };
     transaction.create(ref, { ...stored, createdAt: FieldValue.serverTimestamp() });
@@ -70,7 +75,7 @@ export async function createPaper(paper: Paper, teacherEmail: string): Promise<C
         id: ref.id,
         title: stored.title,
         questionCount: stored.questions.length,
-        published: false,
+        published,
         createdAt: new Date().toISOString(),
       },
     } as const;

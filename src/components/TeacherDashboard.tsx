@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type ChangeEvent } from "react";
+import { PdfQuizMaker } from "@/components/PdfQuizMaker";
 import { parsePaperFile, type Paper } from "@/lib/quiz";
 import type { ResultRow, TeacherPaper } from "@/lib/records";
 
@@ -216,6 +217,14 @@ export function TeacherDashboard({ getToken }: Props) {
           </div>
         )}
       </div>
+
+      <PdfQuizMaker
+        request={request}
+        onSaved={async (title) => {
+          setUploadNotice(`'${title}' 문제지를 저장하고 학생에게 공개했습니다.`);
+          await loadPapers();
+        }}
+      />
 
       <div className="teacher-section">
         <h2>등록한 문제지</h2>

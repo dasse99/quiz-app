@@ -1,4 +1,5 @@
 import { errorResponse, storeErrorResponse } from "@/lib/apiResponses";
+import { validateGeneratedPaper } from "@/lib/azureQuiz";
 import { createPaper, listTeacherPapers } from "@/lib/paperStore";
 import { parsePaperFile } from "@/lib/quiz";
 import { checkTeacher } from "@/lib/teacherAuth";
@@ -15,19 +16,22 @@ export async function GET(request: Request) {
   }
 }
 
-// 교사용: 문제지 등록 (처음에는 비공개)
+// 교사용: 문제지 등록. JSON 파일은 처음에 비공개, AI로 만든 문제지(?source=ai)는 저장하면 바로 공개합니다.
 export async function POST(request: Request) {
   const teacher = await checkTeacher(request.headers.get("authorization"));
   if (!teacher.ok) return errorResponse(teacher.message, teacher.status);
+  const fromAi = new URL(request.url).searchParams.get("source") === "ai";
 
   // 화면에서 검사했더라도 서버에서 한 번 더 같은 기준으로 검사합니다.
-  const parsed = parsePaperFile(await request.text());
+  const text = await request.text();
+  const parsed = fromAi ? validateGeneratedPaper(text) : parsePaperFile(text);
   if (!parsed.ok) {
     return Response.json({ message: "문제지 형식이 올바르지 않습니다.", errors: parsed.errors }, { status: 400 });
   }
+  const paper = "paper" in parsed ? parsed.paper : { title: parsed.title, questions: parsed.questions };
 
   try {
-    const created = await createPaper({ title: parsed.title, questions: parsed.questions }, teacher.email);
+    const created = await createPaper(paper, teacher.email, { published: fromAi });
     if (!created.ok) {
       const message =
         created.reason === "same-content"
